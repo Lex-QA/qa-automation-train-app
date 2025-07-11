@@ -1,1 +1,1 @@
-# swagger-petstore
+# QA Automation Train App
