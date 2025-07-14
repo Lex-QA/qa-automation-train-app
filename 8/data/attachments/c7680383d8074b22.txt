@@ -1,0 +1,7 @@
+INFO     HTTP_LOGGER:event_hooks.py:27 Make POST request to http://85.192.34.140:8080/api/signup
+INFO     HTTP_LOGGER:event_hooks.py:36 Got 201  from http://85.192.34.140:8080/api/signup
+INFO     BASE_ASSERTIONS:base.py:19 Check that response status code equals to 201
+INFO     USERS_ASSERTIONS:users.py:20 Check create user response
+INFO     BASE_ASSERTIONS:base.py:38 Check that "login" equals to iporter@example.net
+INFO     BASE_ASSERTIONS:base.py:38 Check that "password" equals to wI1Fct)GP)
+INFO     SCHEMA_ASSERTIONS:schema.py:19 Validation JSON schema

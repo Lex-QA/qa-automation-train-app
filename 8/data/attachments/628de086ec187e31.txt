@@ -1,0 +1,8 @@
+curl -X 'GET'\
+ http://85.192.34.140:8080/api/user\
+ -H 'host: 85.192.34.140:8080'\
+ -H 'accept: */*'\
+ -H 'accept-encoding: gzip, deflate'\
+ -H 'connection: keep-alive'\
+ -H 'user-agent: python-httpx/0.28.1'\
+ -H 'authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzbWl0aGphbWVzQGV4YW1wbGUub3JnIiwiZXhwIjoxNzUyNTM4MjI2LCJpYXQiOjE3NTI1MjAyMjZ9.Usj2_MLb8ODga9IVcOJMZerrjXTH8vI8CfZrOVOT_0gWhEWEyvCdUcRCKELeWoHusm3R3_SEeuLFXskJYZnq9Q'

@@ -1,0 +1,5 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","409","Get users","Administrator service","Mon Jul 14 19:10:28 GMT 2025","passed","Mon Jul 14 19:10:28 GMT 2025","Get entity","Users","",""
+"","392","Login with correct email and password","Administrator service","Mon Jul 14 19:10:26 GMT 2025","passed","Mon Jul 14 19:10:26 GMT 2025","Login","Authentication","",""
+"","409","Create user","Administrator service","Mon Jul 14 19:10:26 GMT 2025","passed","Mon Jul 14 19:10:27 GMT 2025","Create entity","Users","",""
+"","404","Get user by token","Administrator service","Mon Jul 14 19:10:26 GMT 2025","passed","Mon Jul 14 19:10:27 GMT 2025","Get entity","Users","",""
