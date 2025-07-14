@@ -44,6 +44,25 @@ class APIClient:
         """
         return self.client.post(url, json=json, data=data, files=files)
 
+    @allure.step("Make PUT request to {url}")
+    def put(
+            self,
+            url: URL | str,
+            json: Any | None = None,
+            data: RequestData | None = None,
+            files: RequestFiles | None = None
+    ) -> Response:
+        """
+        Выполняет PUT-запрос.
+
+        :param url: URL-адрес эндпоинта.
+        :param json: Данные в формате JSON.
+        :param data: Форматированные данные формы (например, application/x-www-form-urlencoded).
+        :param files: Файлы для загрузки на сервер.
+        :return: Объект Response с данными ответа.
+        """
+        return self.client.put(url, json=json, data=data, files=files)
+
     @allure.step("Make PATCH request to {url}")
     def patch(self, url: URL | str, json: Any | None = None) -> Response:
         """

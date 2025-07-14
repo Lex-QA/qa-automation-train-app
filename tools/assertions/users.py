@@ -1,9 +1,10 @@
 import allure
 
 from clients.users.users_schema import CreateUserRequestSchema, CreateUserResponseSchema, GetUserResponseSchema, \
-    UserSchema, GetUsersResponseSchema
+    UserSchema, GetUsersResponseSchema, UpdateUserPasswordResponseSchema
 from tools.assertions.base import assert_equal
 from tools.logger import get_logger
+from tools.info import Info
 
 logger = get_logger("USERS_ASSERTIONS")
 
@@ -85,3 +86,27 @@ def assert_get_users_response(
             assert len(user) > 20, f"Invalid Unhuman ID format: {user}"
         else:  # Для других идентификаторов
             assert len(user) >= 5, f"Invalid identifier format: {user}"
+
+
+@allure.step("Check update user password")
+def assert_update_user_password_response(
+        response: UpdateUserPasswordResponseSchema,
+        expected_status: str = Info.SUCCESS,
+        expected_message: str = Info.SUCCESSFULLY_CHANGED
+):
+    """
+    Проверяет ответ на обновление пароля
+
+    :param response: Ответ API
+    :param expected_status: Ожидаемый статус
+    :param expected_message: Ожидаемое сообщение
+    """
+    logger.info("Check update user password response")
+
+    assert response.info.status == expected_status, (
+        f"Expected status '{expected_status}', got '{response.info.status}'"
+    )
+
+    assert expected_message in response.info.message, (
+        f"Expected message containing '{expected_message}', got '{response.info.message}'"
+    )
