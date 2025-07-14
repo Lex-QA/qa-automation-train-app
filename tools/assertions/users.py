@@ -1,7 +1,9 @@
+from typing import List
+
 import allure
 
 from clients.users.users_schema import CreateUserRequestSchema, CreateUserResponseSchema, GetUserResponseSchema, \
-    UserSchema
+    UserSchema, GetUsersResponseSchema
 from tools.assertions.base import assert_equal
 from tools.logger import get_logger
 
@@ -54,3 +56,31 @@ def assert_get_user_response(
 
     assert get_user_response.login == create_user_response.register_data.login
     assert get_user_response.password == create_user_response.register_data.password
+
+@allure.step("Check get user response")
+def assert_get_users_response(
+        get_users_response: List[str]
+
+):
+    """
+    Проверяет, что ответ на получение пользователей соответствует нужному формату и их действительно 100.
+
+    :param get_users_response: Ответ API при запросе данных пользователя.
+    :raises AssertionError: Если данные пользователя не совпадают.
+    """
+    logger.info("Check get users response")
+
+    assert len(get_users_response) == 100, (
+        f"Expected 100 emails, got {len(get_users_response)}"
+    )
+
+    for user in get_users_response:
+        # Для обычных email
+        if "@" in user:
+            assert "." in user.split("@")[1], f"Invalid email format: {user}"
+        # Для специальных идентификаторов (Unhuman...)
+        elif user.startswith("Unhuman"):
+            assert len(user) > 20, f"Invalid Unhuman ID format: {user}"
+        # Для других форматов (string55551 и т.д.)
+        else:
+            assert len(user) >= 5, f"Invalid identifier format: {user}"

@@ -1,4 +1,6 @@
 from pydantic import BaseModel, Field, ConfigDict
+from typing import List
+from pydantic import RootModel
 
 from tools.fakers import fake
 
@@ -50,3 +52,9 @@ class GetUserResponseSchema(BaseModel):
     login: str
     password: str = Field(alias="pass")
     games: list[str]
+
+class GetUsersResponseSchema(RootModel):
+    """
+    Описание структуры ответа получения пользователей.
+    """
+    root: List[str]
