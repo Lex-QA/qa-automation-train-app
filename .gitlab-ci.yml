@@ -1,0 +1,61 @@
+image: python:3.13
+
+stages:
+  - test
+  - report
+  - deploy
+
+variables:
+  APP_HOST: "http://85.192.34.140:8080"
+  ALLURE_RESULTS_DIR: "allure-results"
+  COVERAGE_DIR: "coverage-results"
+
+before_script:
+  - python -m pip install --upgrade pip
+  - pip install -r requirements.txt
+  - mkdir -p ${ALLURE_RESULTS_DIR} ${COVERAGE_DIR}
+
+test:
+  stage: test
+  script:
+    - pytest -m regression --alluredir=${ALLURE_RESULTS_DIR} --numprocesses=2
+    - swagger-coverage-tool save-report --output ${COVERAGE_DIR}
+  artifacts:
+    paths:
+      - ${ALLURE_RESULTS_DIR}/
+      - ${COVERAGE_DIR}/
+      - coverage-history.json
+    expire_in: 1 week
+    when: always
+
+generate-allure:
+  stage: report
+  needs: ["test"]
+  script:
+    - pip install allure-pytest
+    - allure generate ${ALLURE_RESULTS_DIR} --output public/allure --clean
+  artifacts:
+    paths:
+      - public/allure/
+    expire_in: 1 month
+
+generate-coverage:
+  stage: report
+  needs: ["test"]
+  script:
+    - mv ${COVERAGE_DIR}/coverage.html public/coverage.html
+  artifacts:
+    paths:
+      - public/coverage.html
+    expire_in: 1 month
+
+pages:
+  stage: deploy
+  needs:
+    - generate-allure
+    - generate-coverage
+  script:
+    - echo "Deploying reports to GitLab Pages"
+  artifacts:
+    paths:
+      - public/
