@@ -12,10 +12,21 @@ class PrivateUsersClient(APIClient):
     """
 
     @allure.step("Get user")
-    @tracker.track_coverage_httpx(f"{APIRoutes.USERS}")
+    @tracker.track_coverage_httpx(f"{APIRoutes.USER}")
     def get_user_api(self) -> Response:
         """
-         Метод получения пользователя по токен.
+         Метод получение информации о пользователе по токену
+
+        :return: Ответ от сервера в виде объекта httpx.Response
+        """
+
+        return self.get(f"{APIRoutes.USER}")
+
+    @allure.step("Get users")
+    @tracker.track_coverage_httpx(f"{APIRoutes.USERS}")
+    def get_users_api(self) -> Response:
+        """
+         Метод получения логинов последних 100 зарегистрированных пользователей
 
         :return: Ответ от сервера в виде объекта httpx.Response
         """
