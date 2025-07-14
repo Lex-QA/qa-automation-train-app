@@ -1,0 +1,10 @@
+curl -X 'POST'\
+ http://85.192.34.140:8080/api/signup\
+ -H 'host: 85.192.34.140:8080'\
+ -H 'accept: */*'\
+ -H 'accept-encoding: gzip, deflate'\
+ -H 'connection: keep-alive'\
+ -H 'user-agent: python-httpx/0.28.1'\
+ -H 'content-length: 57'\
+ -H 'content-type: application/json'\
+ -d '{"login":"joshuabenitez@example.net","pass":"ziPWW6Xf&4"}'
