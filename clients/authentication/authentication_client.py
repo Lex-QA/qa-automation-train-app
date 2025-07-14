@@ -1,6 +1,5 @@
 import allure
 from httpx import Response
-from pydantic import ValidationError
 
 from clients.api_client import APIClient
 from clients.api_coverage import tracker
@@ -14,15 +13,13 @@ class AuthenticationClient(APIClient):
     Клиент для работы с /api/login
     """
 
-
-
     @allure.step("Authenticate user")
     @tracker.track_coverage_httpx(f"{APIRoutes.AUTHENTICATION}")
     def login_api(self, request: LoginRequestSchema) -> Response:
         """
         Метод выполняет аутентификацию пользователя.
 
-        :param request: Словарь с email и password.
+        :param request: Словарь с username и password.
         :return: Ответ от сервера в виде объекта httpx.Response
         """
         request_data = request.model_dump(by_alias=True)
