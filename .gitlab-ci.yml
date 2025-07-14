@@ -19,7 +19,7 @@ test:
   stage: test
   script:
     - pytest -m regression --alluredir=${ALLURE_RESULTS_DIR} --numprocesses=2
-    - swagger-coverage-tool save-report -d ${COVERAGE_DIR}
+    - swagger-coverage-tool save-report ${COVERAGE_DIR}
   artifacts:
     paths:
       - ${ALLURE_RESULTS_DIR}/
