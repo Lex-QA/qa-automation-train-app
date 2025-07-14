@@ -1,5 +1,3 @@
-from typing import List
-
 import allure
 
 from clients.users.users_schema import CreateUserRequestSchema, CreateUserResponseSchema, GetUserResponseSchema, \
@@ -57,30 +55,33 @@ def assert_get_user_response(
     assert get_user_response.login == create_user_response.register_data.login
     assert get_user_response.password == create_user_response.register_data.password
 
+
 @allure.step("Check get user response")
 def assert_get_users_response(
-        get_users_response: List[str]
-
+        users_response: GetUsersResponseSchema,
+        expected_count: int = 100
 ):
     """
-    Проверяет, что ответ на получение пользователей соответствует нужному формату и их действительно 100.
+    Проверяет список пользователей:
+    1. Что это именно список
+    2. Что количество элементов соответствует ожидаемому
+    3. Проверяет формат каждого элемента
 
-    :param get_users_response: Ответ API при запросе данных пользователя.
-    :raises AssertionError: Если данные пользователя не совпадают.
+    :param users_response: Ответ API со списком пользователей
+    :param expected_count: Ожидаемое количество пользователей
     """
     logger.info("Check get users response")
 
-    assert len(get_users_response) == 100, (
-        f"Expected 100 emails, got {len(get_users_response)}"
+    # Проверка количества
+    assert len(users_response.root) == expected_count, (
+        f"Expected {expected_count} users, got {len(users_response.root)}"
     )
 
-    for user in get_users_response:
-        # Для обычных email
-        if "@" in user:
+    # Проверка формата каждого элемента
+    for user in users_response.root:
+        if "@" in user:  # Для email
             assert "." in user.split("@")[1], f"Invalid email format: {user}"
-        # Для специальных идентификаторов (Unhuman...)
-        elif user.startswith("Unhuman"):
+        elif user.startswith("Unhuman"):  # Для специальных ID
             assert len(user) > 20, f"Invalid Unhuman ID format: {user}"
-        # Для других форматов (string55551 и т.д.)
-        else:
+        else:  # Для других идентификаторов
             assert len(user) >= 5, f"Invalid identifier format: {user}"

@@ -67,13 +67,12 @@ class TestUsers:
     @allure.sub_suite(AllureStory.GET_ENTITY)
     def test_get_users(
             self,
-            function_user: UserFixture,
             private_users_client: PrivateUsersClient
     ):
         response = private_users_client.get_users_api()
         response_data = GetUsersResponseSchema.model_validate_json(response.text)
 
         assert_status_code(response.status_code, HTTPStatus.OK)
-        assert_get_users_response(response_data, function_user.response)
+        assert_get_users_response(response_data)
 
         validate_json_schema(response.json(), response_data.model_json_schema())
