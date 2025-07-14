@@ -15,4 +15,10 @@ coverage-results
 coverage-report.json
 coverage-history.json
 
+# For GitHub
+.github/workflows/_temp/
+
+# For GitLab
+.gitalab-ci_tmp/
+
 .DS_Store
