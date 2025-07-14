@@ -1,7 +1,5 @@
 pytest_plugins = (
-    "fixtures.user",
-    "fixtures.files",
-    "fixtures.games",
+    "fixtures.users",
     "fixtures.authentication",
 
     "fixtures.allure"
