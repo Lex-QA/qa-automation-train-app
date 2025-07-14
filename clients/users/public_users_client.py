@@ -1,17 +1,16 @@
+import allure
 from httpx import Response
 
 from clients.api_client import APIClient
+from clients.api_coverage import tracker
 from clients.public_http_buider import get_public_http_client
 from clients.users.users_schema import CreateUserRequestSchema, CreateUserResponseSchema
-import allure
-from clients.api_coverage import tracker
-
 from tools.routes import APIRoutes
 
 
 class PublicUsersClient(APIClient):
     """
-    Клиент для работы с /api/v1/users
+    Клиент для работы с /api/user
     """
 
     @allure.step("Create user")
@@ -20,7 +19,7 @@ class PublicUsersClient(APIClient):
         """
         Метод выполняет создание пользователя.
 
-        :param request: Словарь с email, password, lastName, firstName, middleName.
+        :param request: Словарь с login, password
         :return: Ответ от сервера в виде объекта httpx.Response
         """
         return self.post(APIRoutes.REGISTRATION, json=request.model_dump(by_alias=True))

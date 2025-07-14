@@ -1,18 +1,17 @@
-import allure
 from httpx import Response
-
+import allure
 from clients.api_client import APIClient
+from clients.api_coverage import tracker
 from clients.private_http_builder import get_private_http_client, AuthenticationUserSchema
 from tools.routes import APIRoutes
-from clients.api_coverage import tracker
 
 
 class PrivateUsersClient(APIClient):
     """
-    Клиент для работы с /api/v1/users
+    Клиент для работы с /api/user
     """
 
-
+    @allure.step("Get user")
     @tracker.track_coverage_httpx(f"{APIRoutes.USERS}")
     def get_user_api(self) -> Response:
         """
