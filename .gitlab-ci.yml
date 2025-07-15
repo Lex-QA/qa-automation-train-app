@@ -40,18 +40,18 @@ generate-report:
   dependencies:
     - test
   before_script:
-    # ставим Java и утилиты
     - apt-get update && apt-get install -y openjdk-17-jdk curl unzip xz-utils
-    # скачиваем Allure CLI
     - curl -L -o allure.tgz "https://github.com/allure-framework/allure2/releases/download/${ALLURE_VERSION}/allure-${ALLURE_VERSION}.tgz"
     - tar -xzf allure.tgz
     - mv "allure-${ALLURE_VERSION}" "$ALLURE_HOME"
     - export PATH="$ALLURE_HOME/bin:$PATH"
   script:
     - mkdir -p public
-    # генерируем HTML из allure-results
+    # Загружаем историю тренда из предыдущего отчёта, если есть
+    - if [ -d public/history ]; then cp -r public/history allure-results/history || true; fi
+    # Генерируем HTML из allure-results
     - allure generate allure-results --clean -o public
-    # копируем coverage
+    # Копируем coverage.html в public
     - cp coverage.html public/
   artifacts:
     paths:
