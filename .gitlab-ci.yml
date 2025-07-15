@@ -39,7 +39,6 @@ test:
 generate-report:
   stage: report
   image: ubuntu:22.04
-  when: always
   dependencies:
     - test
   before_script:
@@ -51,3 +50,30 @@ generate-report:
   script:
     - echo "== Restoring previous history =="
     - if [ -d $HISTORY_DIR ]; then echo "Restoring previous history..."; cp -rv $HISTORY_DIR $ALLURE_RESULTS_DIR/history; else echo "No previous history found."; fi
+
+    - echo "== Generating report =="
+    - mkdir -p $ALLURE_REPORT_DIR
+    - allure generate $ALLURE_RESULTS_DIR --clean -o $ALLURE_REPORT_DIR
+
+    - echo "== Saving new history =="
+    - rm -rf $HISTORY_DIR
+    - cp -rv $ALLURE_REPORT_DIR/history $HISTORY_DIR || echo "Nothing to save"
+
+    - echo "== Copying coverage =="
+    - cp coverage.html $ALLURE_REPORT_DIR/
+  artifacts:
+    paths:
+      - $ALLURE_REPORT_DIR
+    expire_in: 1 week
+
+pages:
+  stage: deploy
+  dependencies:
+    - generate-report
+  script:
+    - echo "Deploying to GitLab Pages"
+  artifacts:
+    paths:
+      - public
+  only:
+    - main
