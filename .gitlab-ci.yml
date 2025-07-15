@@ -9,6 +9,8 @@ variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   ALLURE_VERSION: "2.27.0"
   ALLURE_HOME: "$CI_PROJECT_DIR/allure"
+  ALLURE_RESULTS_DIR: "allure-results"
+  ALLURE_REPORT_DIR: "public"
 
 cache:
   paths:
@@ -22,14 +24,13 @@ before_script:
 test:
   stage: test
   script:
-    - pytest --alluredir=allure-results
+    - pytest --alluredir=$ALLURE_RESULTS_DIR
     - swagger-coverage-tool save-report
   artifacts:
     when: always
     paths:
-      - allure-results/
+      - $ALLURE_RESULTS_DIR/
       - coverage.html
-      - allure-results/history/
     expire_in: 1 week
 
 generate-report:
@@ -37,6 +38,7 @@ generate-report:
   image: ubuntu:22.04
   dependencies:
     - test
+    - generate-report
   before_script:
     - apt-get update && apt-get install -y openjdk-17-jdk curl unzip xz-utils
     - curl -L -o allure.tgz "https://github.com/allure-framework/allure2/releases/download/${ALLURE_VERSION}/allure-${ALLURE_VERSION}.tgz"
@@ -44,14 +46,15 @@ generate-report:
     - mv "allure-${ALLURE_VERSION}" "$ALLURE_HOME"
     - export PATH="$ALLURE_HOME/bin:$PATH"
   script:
-    - mkdir -p allure-results/history
-    - if [ -d allure-results/history ]; then echo "History found."; else echo "No history yet."; fi
-    - mkdir -p public
-    - allure generate allure-results --clean -o public
-    - cp coverage.html public/
+    - mkdir -p $ALLURE_RESULTS_DIR
+    - if [ -d public/history ]; then cp -r public/history $ALLURE_RESULTS_DIR/; fi
+    - mkdir -p $ALLURE_REPORT_DIR
+    - allure generate $ALLURE_RESULTS_DIR --clean -o $ALLURE_REPORT_DIR
+    - cp coverage.html $ALLURE_REPORT_DIR/
   artifacts:
     paths:
-      - public
+      - $ALLURE_REPORT_DIR
+      - $ALLURE_REPORT_DIR/history/
     expire_in: 1 week
 
 pages:
