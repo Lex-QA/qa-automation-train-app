@@ -56,3 +56,4 @@ pages:
       - public
   only:
     - main
+  before_script: []  # <-- отключаем глобальный before_script
