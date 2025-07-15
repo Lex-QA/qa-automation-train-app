@@ -7,28 +7,38 @@ variables:
   ALLURE_VERSION: "2.27.0"
   ALLURE_HOME: "$CI_PROJECT_DIR/allure"
 
+cache:
+  paths:
+    - .venv/
+
 test:
   stage: test
-  image: python:3.13
+  image: python:3.11
   script:
-    - apt-get update && apt-get install -y openjdk-17-jre curl unzip
-    - python -m pip install --upgrade pip
+    - python -m venv .venv
+    - . .venv/bin/activate
+    - pip install --upgrade pip
     - pip install -r requirements.txt
     - pytest --alluredir=allure-results
-    - python -m swagger_coverage_tool save-report
+    - swagger-coverage-tool save-report
+    - mkdir -p allure-results
+    - echo "coverage_report_url=https://$CI_PROJECT_NAMESPACE.gitlab.io/$CI_PROJECT_NAME/coverage.html" >> allure-results/environment.properties
   artifacts:
-    when: always
     paths:
       - allure-results/
       - coverage.html
-      - coverage-history.json
+    expire_in: 1 week
 
 generate-allure-report:
   stage: report
   image: openjdk:17
+  dependencies:
+    - test
   script:
+    - apt-get update && apt-get install -y curl
     - curl -o allure.tgz -L "https://github.com/allure-framework/allure2/releases/download/${ALLURE_VERSION}/allure-${ALLURE_VERSION}.tgz"
-    - tar -xzf allure.tgz && mv "allure-${ALLURE_VERSION}" "$ALLURE_HOME"
+    - tar -xzf allure.tgz
+    - mv allure-${ALLURE_VERSION} $ALLURE_HOME
     - export PATH="$ALLURE_HOME/bin:$PATH"
     - mkdir -p public
     - allure generate allure-results --clean -o public
@@ -36,11 +46,12 @@ generate-allure-report:
   artifacts:
     paths:
       - public
+    expire_in: 1 week
 
 pages:
   stage: deploy
   script:
-    - echo "Publishing Allure and Coverage"
+    - echo "Publishing GitLab Pages"
   artifacts:
     paths:
       - public
