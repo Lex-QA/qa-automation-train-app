@@ -6,6 +6,7 @@ stages:
 image: python:3.11
 
 variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   ALLURE_VERSION: "2.27.0"
   ALLURE_HOME: "$CI_PROJECT_DIR/allure"
   ALLURE_RESULTS_DIR: "allure-results"
@@ -13,11 +14,13 @@ variables:
   HISTORY_DIR: "allure-history"
 
 cache:
+  key: allure-history
   paths:
     - .cache/pip
+    - allure-history
 
 before_script:
-  - pip install --upgrade pip
+  - python -m pip install --upgrade pip
   - pip install -r requirements.txt
   - pip install allure-pytest
 
@@ -45,38 +48,22 @@ generate-report:
     - mv "allure-${ALLURE_VERSION}" "$ALLURE_HOME"
     - export PATH="$ALLURE_HOME/bin:$PATH"
   script:
-    - echo "== Checking allure-results dir =="
-    - ls -R $ALLURE_RESULTS_DIR || echo "No allure-results found"
-
     - echo "== Restoring previous history =="
-    - if [ -d $HISTORY_DIR ]; then
-      echo "Restoring previous history...";
-      cp -rv $HISTORY_DIR $ALLURE_RESULTS_DIR/history;
-      else
-      echo "No previous history found.";
-      fi
-
-    - echo "== Contents of allure-results AFTER restoring history =="
-    - ls -R $ALLURE_RESULTS_DIR
+    - if [ -d $HISTORY_DIR ]; then echo "Restoring previous history..."; cp -rv $HISTORY_DIR $ALLURE_RESULTS_DIR/history; else echo "No previous history found."; fi
 
     - echo "== Generating report =="
     - mkdir -p $ALLURE_REPORT_DIR
     - allure generate $ALLURE_RESULTS_DIR --clean -o $ALLURE_REPORT_DIR
 
-    - echo "== Checking if history generated in report =="
-    - ls -R $ALLURE_REPORT_DIR/history || echo "No history generated"
-
     - echo "== Saving new history =="
     - rm -rf $HISTORY_DIR
     - cp -rv $ALLURE_REPORT_DIR/history $HISTORY_DIR || echo "Nothing to save"
 
-    - echo "== Copying coverage.html =="
+    - echo "== Copying coverage =="
     - cp coverage.html $ALLURE_REPORT_DIR/
-
   artifacts:
     paths:
       - $ALLURE_REPORT_DIR
-      - $HISTORY_DIR
     expire_in: 1 week
 
 pages:
