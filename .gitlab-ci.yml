@@ -50,7 +50,7 @@ generate-allure-report:
 pages:
   stage: pages
   script:
-    - echo "GitLab Pages: публикуем Allure отчет"
+    - echo "Публикация отчета Allure на GitLab Pages"
   artifacts:
     paths:
       - public
