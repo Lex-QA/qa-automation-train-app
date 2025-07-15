@@ -1,43 +1,11 @@
-stages:
-  - test
-  - report
-  - deploy
-
-variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-  ALLURE_VERSION: "2.27.0"
-  ALLURE_HOME: "$CI_PROJECT_DIR/allure"
-
-cache:
-  paths:
-    - .cache/pip
-
-default:
-  image: python:3.11
-
-before_script:
-  - python -m pip install --upgrade pip
-  - python -m venv .venv
-  - source .venv/bin/activate
-  - pip install -r requirements.txt
-  - pip install allure-pytest
-
-test:
-  stage: test
-  script:
-    - pytest --alluredir=allure-results
-  artifacts:
-    paths:
-      - allure-results/
-      - coverage.html
-      - coverage-history.json
-    expire_in: 1 week
-
 generate-report:
   stage: report
-  image: openjdk:17
+  image: ubuntu:22.04
+  variables:
+    ALLURE_VERSION: "2.27.0"
+    ALLURE_HOME: "/opt/allure"
   before_script:
-    - apt-get update && apt-get install -y curl unzip xz-utils
+    - apt-get update && apt-get install -y openjdk-17-jdk curl unzip xz-utils
     - curl -L -o allure.tgz "https://github.com/allure-framework/allure2/releases/download/${ALLURE_VERSION}/allure-${ALLURE_VERSION}.tgz"
     - tar -xzf allure.tgz
     - mv allure-${ALLURE_VERSION} $ALLURE_HOME
@@ -45,19 +13,10 @@ generate-report:
   script:
     - mkdir -p public
     - allure generate allure-results --clean -o public
-    # Добавим ссылку в отчет
-    - echo "[Coverage Report](./coverage.html)" > public/external-link.md
+    - echo "[Coverage Report](./coverage.html)" > public/coverage-link.md
   artifacts:
     paths:
       - public
     expire_in: 1 week
-
-pages:
-  stage: deploy
-  script:
-    - echo "Deploying GitLab Pages..."
-  artifacts:
-    paths:
-      - public
   only:
     - main
