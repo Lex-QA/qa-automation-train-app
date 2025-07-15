@@ -1,59 +1,53 @@
 stages:
-  - build
   - test
+  - report
   - deploy
+
+image: python:3.11
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-  ALLURE_VERSION: "2.27.0"
-  ALLURE_HOME: "$CI_PROJECT_DIR/allure"
+  ALLURE_RESULTS_DIR: allure-results
+  ALLURE_REPORT_DIR: public/allure-report
+  SWAGGER_COVERAGE_HTML: public/coverage.html
+  SWAGGER_COVERAGE_JSON: public/coverage-history.json
 
 cache:
   paths:
     - .cache/pip
 
 before_script:
-  - python -m venv .venv
-  - source .venv/bin/activate
+  - python -m venv venv
+  - . venv/bin/activate
   - pip install --upgrade pip
   - pip install -r requirements.txt
-  - pip install allure-pytest
 
-run-tests:
+test:
   stage: test
   script:
-    - pytest --alluredir=allure-results
+    - pytest --alluredir=$ALLURE_RESULTS_DIR
   artifacts:
-    when: always
     paths:
-      - allure-results/
-    expire_in: 1 hour
+      - $ALLURE_RESULTS_DIR
 
-generate-allure-report:
-  stage: deploy
-  image: ubuntu:22.04
-  before_script:
-    - apt-get update && apt-get install -y curl openjdk-17-jre tar unzip
-    - curl -L -o allure.tgz "https://github.com/allure-framework/allure2/releases/download/${ALLURE_VERSION}/allure-${ALLURE_VERSION}.tgz"
-    - tar -xzf allure.tgz
-    - mv allure-${ALLURE_VERSION} $ALLURE_HOME
-    - export PATH="$ALLURE_HOME/bin:$PATH"
-    - python3 tools/allure/environment.py
+generate-report:
+  stage: report
   script:
     - mkdir -p public
-    - allure generate allure-results --clean -o public
+    - allure-pytest generate $ALLURE_RESULTS_DIR -o $ALLURE_REPORT_DIR
+    - python -m swagger_coverage_tool.cli html-report -o $SWAGGER_COVERAGE_HTML
+    - python -m swagger_coverage_tool.cli export-history -o $SWAGGER_COVERAGE_JSON
   artifacts:
     paths:
       - public
-  only:
-    - main
+    expire_in: 1 week
+  dependencies:
+    - test
 
 pages:
   stage: deploy
   script:
-    - echo "Publishing Allure report to GitLab Pages..."
+    - echo "GitLab Pages deploy stage"
   artifacts:
     paths:
       - public
-  only:
-    - main
