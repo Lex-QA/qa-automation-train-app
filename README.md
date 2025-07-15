@@ -4,7 +4,9 @@
 ## Links
 
 - [Allure Report on GitLab Pages](https://qa-automation-train-app-de0a64.gitlab.io/)
+- [SWAGGER Coverage Report on GitLab Pages](https://qa-automation-train-app-de0a64.gitlab.io/coverage.html)
 - [GitLab CI/CD](https://gitlab.com/lex-qa/qa-automation-train-app/-/pipelines)
+
 
 - [Allure Report on GitHub Pages](https://Lex-QA.github.io/qa-automation-train-app/8/index.html)
 - [GitHub Actions CI/CD](https://github.com/Lex-QA/qa-automation-train-app/actions)
