@@ -6,6 +6,9 @@
 - [Allure Report on GitLab Pages](https://qa-automation-train-app-de0a64.gitlab.io/)
 - [GitLab CI/CD](https://gitlab.com/lex-qa/qa-automation-train-app/-/pipelines)
 
+- [Allure Report on GitHub Pages](https://Lex-QA.github.io/qa-automation-train-app/8/index.html)
+- [GitHub Actions CI/CD](https://github.com/Lex-QA/qa-automation-train-app/actions)
+
 ## Overview
 
 This project provides an example of API testing for a [REST API](https://en.wikipedia.org/wiki/REST) using Python. It
