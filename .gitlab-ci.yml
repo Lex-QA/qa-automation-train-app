@@ -5,12 +5,15 @@ stages:
 
 variables:
   PYTHON_VERSION: "3.13"
+  ALLURE_VERSION: "2.27.0"
+  ALLURE_HOME: ".cache/allure-${ALLURE_VERSION}"
 
 cache:
   key: default
   paths:
     - .venv/
     - coverage-history.json
+    - .cache/
 
 test:
   stage: test
@@ -33,8 +36,17 @@ generate-report:
   image: python:$PYTHON_VERSION
   dependencies:
     - test
-  script:
+  before_script:
     - pip install allure-pytest
+    # Установка и кэширование Allure CLI
+    - |
+      if [ ! -x "$ALLURE_HOME/bin/allure" ]; then
+        mkdir -p .cache
+        wget https://github.com/allure-framework/allure2/releases/download/${ALLURE_VERSION}/allure-${ALLURE_VERSION}.tgz
+        tar -xzf allure-${ALLURE_VERSION}.tgz -C .cache
+      fi
+    - export PATH="$ALLURE_HOME/bin:$PATH"
+  script:
     - mkdir -p public
     - allure generate allure-results --clean -o public
     - cp coverage.html public/coverage.html
@@ -46,7 +58,7 @@ generate-report:
 pages:
   stage: pages
   script:
-    - echo "✅ GitLab Pages успешно опубликованы"
+    - echo "✅ GitLab Pages опубликованы"
   artifacts:
     paths:
       - public
