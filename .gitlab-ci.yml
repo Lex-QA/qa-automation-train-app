@@ -4,24 +4,28 @@ stages:
   - deploy
 
 variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   ALLURE_VERSION: "2.27.0"
   ALLURE_HOME: "$CI_PROJECT_DIR/allure"
 
 cache:
   paths:
-    - .venv/
+    - .cache/pip
+
+default:
+  image: python:3.11
 
 before_script:
+  - python -m pip install --upgrade pip
   - python -m venv .venv
   - source .venv/bin/activate
-  - python -m pip install --upgrade pip
   - pip install -r requirements.txt
+  - pip install allure-pytest
 
 test:
   stage: test
   script:
     - pytest --alluredir=allure-results
-    - python tools/swagger/generate_coverage.py  # генерирует coverage.html
   artifacts:
     paths:
       - allure-results/
@@ -29,19 +33,20 @@ test:
       - coverage-history.json
     expire_in: 1 week
 
-generate-allure-report:
+generate-report:
   stage: report
-  image: eclipse-temurin:17-jdk-jammy
-  dependencies:
-    - test
-  script:
-    - curl -o allure.tgz -L "https://github.com/allure-framework/allure2/releases/download/${ALLURE_VERSION}/allure-${ALLURE_VERSION}.tgz"
+  image: openjdk:17
+  before_script:
+    - apt-get update && apt-get install -y curl unzip xz-utils
+    - curl -L -o allure.tgz "https://github.com/allure-framework/allure2/releases/download/${ALLURE_VERSION}/allure-${ALLURE_VERSION}.tgz"
     - tar -xzf allure.tgz
     - mv allure-${ALLURE_VERSION} $ALLURE_HOME
     - export PATH="$ALLURE_HOME/bin:$PATH"
+  script:
     - mkdir -p public
     - allure generate allure-results --clean -o public
-    - cp coverage.html public/
+    # Добавим ссылку в отчет
+    - echo "[Coverage Report](./coverage.html)" > public/external-link.md
   artifacts:
     paths:
       - public
@@ -49,10 +54,8 @@ generate-allure-report:
 
 pages:
   stage: deploy
-  dependencies:
-    - generate-allure-report
   script:
-    - echo "Publishing Allure + Coverage to GitLab Pages..."
+    - echo "Deploying GitLab Pages..."
   artifacts:
     paths:
       - public
