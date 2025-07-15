@@ -10,14 +10,14 @@ variables:
   ALLURE_HOME: "$CI_PROJECT_DIR/allure"
   ALLURE_RESULTS_DIR: "allure-results"
   ALLURE_REPORT_DIR: "public"
-  HISTORY_DIR: ".allure-history"
+  HISTORY_DIR: "allure-history"
 
 cache:
   paths:
     - .cache/pip
 
 before_script:
-  - python -m pip install --upgrade pip
+  - pip install --upgrade pip
   - pip install -r requirements.txt
   - pip install allure-pytest
 
@@ -45,11 +45,13 @@ generate-report:
     - mv "allure-${ALLURE_VERSION}" "$ALLURE_HOME"
     - export PATH="$ALLURE_HOME/bin:$PATH"
   script:
-    # Восстанавливаем history из предыдущего пайплайна
-    - if [ -d $HISTORY_DIR ]; then cp -r $HISTORY_DIR $ALLURE_RESULTS_DIR/history; fi
+    # Восстанавливаем history
+    - if [ -d $HISTORY_DIR ]; then echo "Copying history to allure-results..."; cp -r $HISTORY_DIR $ALLURE_RESULTS_DIR/history; fi
+    # Генерируем отчет
     - mkdir -p $ALLURE_REPORT_DIR
     - allure generate $ALLURE_RESULTS_DIR --clean -o $ALLURE_REPORT_DIR
-    # Сохраняем history для следующего пайплайна
+    # Сохраняем свежую history
+    - rm -rf $HISTORY_DIR
     - cp -r $ALLURE_REPORT_DIR/history $HISTORY_DIR || echo "No history to save"
     - cp coverage.html $ALLURE_REPORT_DIR/
   artifacts:
