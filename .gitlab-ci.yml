@@ -36,7 +36,7 @@ generate-allure-report:
   dependencies:
     - test
   before_script:
-    - apt-get update && apt-get install -y openjdk-11-jre curl unzip
+    - apt-get update && apt-get install -y openjdk-17-jre curl unzip
     - curl -o allure.zip -L https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.zip
     - unzip -o allure.zip -d /opt/
     - export PATH=$PATH:/opt/allure-2.27.0/bin
@@ -50,7 +50,7 @@ generate-allure-report:
 pages:
   stage: pages
   script:
-    - echo "Публикация отчета Allure на GitLab Pages"
+    - echo "Публикация Allure-отчета на GitLab Pages"
   artifacts:
     paths:
       - public
