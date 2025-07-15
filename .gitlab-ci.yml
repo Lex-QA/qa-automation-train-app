@@ -37,8 +37,10 @@ generate-report:
   dependencies:
     - test
   before_script:
+    # Устанавливаем Java и инструменты
+    - apt-get update && apt-get install -y openjdk-17-jre wget curl unzip
     - pip install allure-pytest
-    # Установка и кэширование Allure CLI
+    # Кэшируем и добавляем Allure CLI
     - |
       if [ ! -x "$ALLURE_HOME/bin/allure" ]; then
         mkdir -p .cache
@@ -58,7 +60,7 @@ generate-report:
 pages:
   stage: pages
   script:
-    - echo "✅ GitLab Pages опубликованы"
+    - echo "✅ Pages опубликованы"
   artifacts:
     paths:
       - public
