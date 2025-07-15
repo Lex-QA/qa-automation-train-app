@@ -4,29 +4,32 @@ stages:
   - pages
 
 variables:
-  ALLURE_VERSION: 2.27.0
-  ALLURE_HOME: "$CI_PROJECT_DIR/allure"
+  ALLURE_VERSION: "2.27.0"
+  ALLURE_HOME: "/tmp/allure"
 
 test:
   stage: test
   image: python:3.13
+  services: []
   script:
-    - apt-get update && apt-get install -y curl openjdk-17-jre
+    - apt-get update && apt-get install -y openjdk-17-jre curl unzip
+    - python -m pip install --upgrade pip
     - pip install -r requirements.txt
     - pytest -m regression --alluredir=allure-results --numprocesses=2
     - swagger-coverage-tool save-report
-    - PYTHONPATH=$PYTHONPATH:. python tools/allure/environment.py
+    - echo "coverage_report_url=https://$CI_PROJECT_PATH_SLUG.gitlab.io/coverage.html" >> allure-results/environment.properties
   artifacts:
     paths:
-      - allure-results/
+      - allure-results
       - coverage.html
       - coverage-history.json
     expire_in: 1 week
 
 generate-allure-report:
   stage: report
-  image: openjdk:17
+  image: ubuntu:22.04
   script:
+    - apt-get update && apt-get install -y curl unzip openjdk-17-jre xargs
     - curl -o allure.tgz -L "https://github.com/allure-framework/allure2/releases/download/${ALLURE_VERSION}/allure-${ALLURE_VERSION}.tgz"
     - tar -xzf allure.tgz && mv allure-${ALLURE_VERSION} $ALLURE_HOME
     - export PATH="$ALLURE_HOME/bin:$PATH"
@@ -43,9 +46,9 @@ generate-allure-report:
 pages:
   stage: pages
   script:
-    - echo "Deployed to GitLab Pages"
+    - mv public/ public_html/
   artifacts:
     paths:
-      - public
+      - public_html
   only:
     - main
