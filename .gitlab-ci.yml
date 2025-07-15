@@ -41,6 +41,7 @@ generate-report:
   image: ubuntu:22.04
   dependencies:
     - test
+  if: always()
   before_script:
     - apt-get update && apt-get install -y openjdk-17-jdk curl unzip xz-utils
     - curl -L -o allure.tgz "https://github.com/allure-framework/allure2/releases/download/${ALLURE_VERSION}/allure-${ALLURE_VERSION}.tgz"
@@ -70,6 +71,7 @@ pages:
   stage: deploy
   dependencies:
     - generate-report
+  if: always()
   script:
     - echo "Deploying to GitLab Pages"
   artifacts:
