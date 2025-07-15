@@ -42,6 +42,7 @@ generate-allure-report:
     - export PATH=$PATH:/opt/allure-2.27.0/bin
   script:
     - allure generate allure-results --clean -o public
+    - cp coverage.html public/coverage.html
   artifacts:
     paths:
       - public
@@ -50,10 +51,10 @@ generate-allure-report:
 pages:
   stage: pages
   script:
-    - echo "Публикация Allure-отчета на GitLab Pages"
+    - echo "Публикация Allure-отчёта и coverage.html на GitLab Pages"
   artifacts:
     paths:
       - public
   only:
     - main
-  before_script: []  # <-- отключаем глобальный before_script
+  before_script: []  # отключаем глобальный before_script
