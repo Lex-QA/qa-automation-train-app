@@ -17,21 +17,19 @@ cache:
 before_script:
   - python -m pip install --upgrade pip
   - pip install -r requirements.txt
-  # allure-pytest — нужен pytest-плагин, но не CLI
   - pip install allure-pytest
 
 test:
   stage: test
   script:
-    # запускаем pytest, собираем allure-results
     - pytest --alluredir=allure-results
-    # генерируем coverage.html
     - swagger-coverage-tool save-report
   artifacts:
     when: always
     paths:
       - allure-results/
       - coverage.html
+      - allure-results/history/    # <== Сохраняем history как отдельный артефакт
     expire_in: 1 week
 
 generate-report:
@@ -46,12 +44,10 @@ generate-report:
     - mv "allure-${ALLURE_VERSION}" "$ALLURE_HOME"
     - export PATH="$ALLURE_HOME/bin:$PATH"
   script:
+    - mkdir -p allure-results/history     # <== Убедимся, что папка есть
+    - if [ -d allure-results/history ]; then echo "History found."; else echo "No history yet."; fi
     - mkdir -p public
-    # Загружаем историю тренда из предыдущего отчёта, если есть
-    - if [ -d public/history ]; then cp -r public/history allure-results/history || true; fi
-    # Генерируем HTML из allure-results
     - allure generate allure-results --clean -o public
-    # Копируем coverage.html в public
     - cp coverage.html public/
   artifacts:
     paths:
