@@ -29,7 +29,7 @@ test:
     paths:
       - allure-results/
       - coverage.html
-      - allure-results/history/    # <== Сохраняем history как отдельный артефакт
+      - allure-results/history/
     expire_in: 1 week
 
 generate-report:
@@ -44,7 +44,7 @@ generate-report:
     - mv "allure-${ALLURE_VERSION}" "$ALLURE_HOME"
     - export PATH="$ALLURE_HOME/bin:$PATH"
   script:
-    - mkdir -p allure-results/history     # <== Убедимся, что папка есть
+    - mkdir -p allure-results/history
     - if [ -d allure-results/history ]; then echo "History found."; else echo "No history yet."; fi
     - mkdir -p public
     - allure generate allure-results --clean -o public
