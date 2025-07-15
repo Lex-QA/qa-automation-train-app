@@ -1,61 +1,58 @@
-image: python:3.13
-
 stages:
   - test
   - report
-  - deploy
+  - pages
 
 variables:
   APP_HOST: "http://85.192.34.140:8080"
-  ALLURE_RESULTS_DIR: "allure-results"
-  COVERAGE_DIR: "coverage-results"
+  PYTHON_VERSION: "3.13"
+
+cache:
+  paths:
+    - .cache/pip
+    - coverage-history.json
 
 before_script:
   - python -m pip install --upgrade pip
   - pip install -r requirements.txt
-  - mkdir -p ${ALLURE_RESULTS_DIR} ${COVERAGE_DIR}
 
 test:
   stage: test
+  image: python:$PYTHON_VERSION
   script:
-    - pytest -m regression --alluredir=${ALLURE_RESULTS_DIR} --numprocesses=2
-    - swagger-coverage-tool save-report ${COVERAGE_DIR}
+    - pytest -m regression --alluredir=allure-results --numprocesses=2
+    - swagger-coverage-tool save-report
   artifacts:
-    paths:
-      - ${ALLURE_RESULTS_DIR}/
-      - ${COVERAGE_DIR}/
-      - coverage-history.json
-    expire_in: 1 week
     when: always
+    paths:
+      - allure-results/
+      - coverage-history.json
+      - coverage.html
+    expire_in: 1 week
 
-generate-allure:
+generate-allure-report:
   stage: report
-  needs: ["test"]
+  image: python:$PYTHON_VERSION
+  dependencies:
+    - test
+  before_script:
+    - apt-get update && apt-get install -y openjdk-11-jre curl unzip
+    - curl -o allure.zip -L https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.zip
+    - unzip -o allure.zip -d /opt/
+    - export PATH=$PATH:/opt/allure-2.27.0/bin
   script:
-    - pip install allure-pytest
-    - allure generate ${ALLURE_RESULTS_DIR} --output public/allure --clean
+    - allure generate allure-results --clean -o public
   artifacts:
     paths:
-      - public/allure/
-    expire_in: 1 month
-
-generate-coverage:
-  stage: report
-  needs: ["test"]
-  script:
-    - mv ${COVERAGE_DIR}/coverage.html public/coverage.html
-  artifacts:
-    paths:
-      - public/coverage.html
-    expire_in: 1 month
+      - public
+    expire_in: 1 week
 
 pages:
-  stage: deploy
-  needs:
-    - generate-allure
-    - generate-coverage
+  stage: pages
   script:
-    - echo "Deploying reports to GitLab Pages"
+    - echo "GitLab Pages: публикуем Allure отчет"
   artifacts:
     paths:
-      - public/
+      - public
+  only:
+    - main
