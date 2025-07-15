@@ -1,74 +1,57 @@
 stages:
   - build
   - test
-  - report
   - deploy
 
 variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   ALLURE_VERSION: "2.27.0"
-  ALLURE_HOME: "/opt/allure"
-  PYTHONPATH: "${CI_PROJECT_DIR}"
+  ALLURE_HOME: "$CI_PROJECT_DIR/allure"
 
-# 🔧 Установка зависимостей
-build:
-  stage: build
-  image: python:3.11
-  script:
-    - python -m venv .venv
-    - source .venv/bin/activate
-    - pip install --upgrade pip
-    - pip install -r requirements.txt
-  artifacts:
-    paths:
-      - .venv
-    expire_in: 1 week
+cache:
+  paths:
+    - .cache/pip
 
-# ✅ Запуск тестов
-pytest:
+before_script:
+  - python -m venv .venv
+  - source .venv/bin/activate
+  - pip install --upgrade pip
+  - pip install -r requirements.txt
+  - pip install allure-pytest
+
+run-tests:
   stage: test
-  image: python:3.11
-  dependencies:
-    - build
   script:
-    - source .venv/bin/activate
     - pytest --alluredir=allure-results
   artifacts:
+    when: always
     paths:
-      - allure-results
-      - coverage-history.json
-    expire_in: 1 week
+      - allure-results/
+    expire_in: 1 hour
 
-# 📊 Генерация отчета Allure + Coverage
-generate-report:
-  stage: report
+generate-allure-report:
+  stage: deploy
   image: ubuntu:22.04
-  dependencies:
-    - pytest
   before_script:
-    - apt-get update && apt-get install -y curl openjdk-17-jdk unzip xz-utils
+    - apt-get update && apt-get install -y curl openjdk-17-jre tar unzip
     - curl -L -o allure.tgz "https://github.com/allure-framework/allure2/releases/download/${ALLURE_VERSION}/allure-${ALLURE_VERSION}.tgz"
     - tar -xzf allure.tgz
-    - mv allure-${ALLURE_VERSION} ${ALLURE_HOME}
-    - export PATH="${ALLURE_HOME}/bin:$PATH"
+    - mv allure-${ALLURE_VERSION} $ALLURE_HOME
+    - export PATH="$ALLURE_HOME/bin:$PATH"
+    - python3 tools/allure/environment.py
   script:
     - mkdir -p public
     - allure generate allure-results --clean -o public
-    - cp coverage.html public/ || echo "coverage.html not found"
-    - echo "<meta http-equiv=\"refresh\" content=\"0; url=./index.html\" />" > public/index.html
   artifacts:
     paths:
       - public
-    expire_in: 1 week
   only:
     - main
 
-# 🚀 Деплой на GitLab Pages
 pages:
   stage: deploy
-  dependencies:
-    - generate-report
   script:
-    - echo "Deploying GitLab Pages..."
+    - echo "Publishing Allure report to GitLab Pages..."
   artifacts:
     paths:
       - public
