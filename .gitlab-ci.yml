@@ -4,23 +4,20 @@ stages:
   - pages
 
 variables:
-  APP_HOST: "http://85.192.34.140:8080"
   PYTHON_VERSION: "3.13"
 
 cache:
+  key: default
   paths:
-    - .cache/pip
+    - .venv/
     - coverage-history.json
-
-before_script:
-  - python -m pip install --upgrade pip
-  - pip install -r requirements.txt
 
 test:
   stage: test
   image: python:$PYTHON_VERSION
   script:
-    - python path/to/create_allure_environment_file.py  # ← путь к твоему скрипту
+    - python -m pip install --upgrade pip
+    - pip install -r requirements.txt
     - pytest -m regression --alluredir=allure-results --numprocesses=2
     - swagger-coverage-tool save-report
   artifacts:
@@ -31,31 +28,27 @@ test:
       - coverage-history.json
     expire_in: 1 week
 
-generate-allure-report:
+generate-report:
   stage: report
   image: python:$PYTHON_VERSION
   dependencies:
     - test
-  before_script:
-    - apt-get update && apt-get install -y openjdk-17-jre curl unzip
-    - curl -o allure.zip -L https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.zip
-    - unzip -o allure.zip -d /opt/
-    - export PATH=$PATH:/opt/allure-2.27.0/bin
   script:
+    - pip install allure-pytest
+    - mkdir -p public
     - allure generate allure-results --clean -o public
     - cp coverage.html public/coverage.html
+    - cp tools/allure/index.html public/index.html
   artifacts:
     paths:
       - public
-    expire_in: 1 week
 
 pages:
   stage: pages
   script:
-    - echo "✅ Публикация Allure и coverage.html на GitLab Pages"
+    - echo "✅ GitLab Pages успешно опубликованы"
   artifacts:
     paths:
       - public
   only:
     - main
-  before_script: []  # отключаем глобальный before_script
