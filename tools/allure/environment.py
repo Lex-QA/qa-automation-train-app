@@ -1,4 +1,3 @@
-import os
 import platform
 import sys
 
@@ -14,11 +13,8 @@ def create_allure_environment_file():
     items.extend([
         f'os_info={os_info}',
         f'python_version={python_version}'
+        f'coverage_report_url=https://<your-gitlab-user>.gitlab.io/coverage.html'
     ])
-
-    ci_pages_url = os.getenv("CI_PAGES_URL")
-    if ci_pages_url:
-        items.append(f'Coverage Report={ci_pages_url}/coverage.html')
 
     properties = '\n'.join(items)
 

@@ -4,63 +4,46 @@ stages:
   - pages
 
 variables:
-  PYTHON_VERSION: "3.13"
-  ALLURE_VERSION: "2.27.0"
-  ALLURE_HOME: ".cache/allure-${ALLURE_VERSION}"
-
-cache:
-  key: default
-  paths:
-    - .venv/
-    - coverage-history.json
-    - .cache/
+  ALLURE_VERSION: 2.27.0
+  ALLURE_HOME: "$CI_PROJECT_DIR/allure"
 
 test:
   stage: test
-  image: python:$PYTHON_VERSION
+  image: python:3.13
   script:
-    - python -m pip install --upgrade pip
+    - apt-get update && apt-get install -y curl openjdk-17-jre
     - pip install -r requirements.txt
     - pytest -m regression --alluredir=allure-results --numprocesses=2
     - swagger-coverage-tool save-report
+    - python tools/allure/environment.py
   artifacts:
-    when: always
     paths:
       - allure-results/
       - coverage.html
       - coverage-history.json
     expire_in: 1 week
 
-generate-report:
+generate-allure-report:
   stage: report
-  image: python:$PYTHON_VERSION
-  dependencies:
-    - test
-  before_script:
-    # Устанавливаем Java и инструменты
-    - apt-get update && apt-get install -y openjdk-17-jre wget curl unzip
-    - pip install allure-pytest
-    # Кэшируем и добавляем Allure CLI
-    - |
-      if [ ! -x "$ALLURE_HOME/bin/allure" ]; then
-        mkdir -p .cache
-        wget https://github.com/allure-framework/allure2/releases/download/${ALLURE_VERSION}/allure-${ALLURE_VERSION}.tgz
-        tar -xzf allure-${ALLURE_VERSION}.tgz -C .cache
-      fi
-    - export PATH="$ALLURE_HOME/bin:$PATH"
+  image: openjdk:17
   script:
+    - curl -o allure.tgz -L "https://github.com/allure-framework/allure2/releases/download/${ALLURE_VERSION}/allure-${ALLURE_VERSION}.tgz"
+    - tar -xzf allure.tgz && mv allure-${ALLURE_VERSION} $ALLURE_HOME
+    - export PATH="$ALLURE_HOME/bin:$PATH"
     - mkdir -p public
     - allure generate allure-results --clean -o public
-    - cp coverage.html public/coverage.html
-    - cp tools/allure/index.html public/index.html
+    - cp coverage.html public/
   artifacts:
     paths:
       - public
+    expire_in: 1 week
+  dependencies:
+    - test
 
 pages:
   stage: pages
   script:
-    - echo "✅ Pages опубликованы"
+    - echo "Pages deployed"
   artifacts:
     paths:
       - public
