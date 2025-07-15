@@ -10,10 +10,9 @@ variables:
 test:
   stage: test
   image: python:3.13
-  services: []
   script:
     - apt-get update && apt-get install -y openjdk-17-jre curl unzip
-    - python -m pip install --upgrade pip
+    - pip install --upgrade pip
     - pip install -r requirements.txt
     - pytest -m regression --alluredir=allure-results --numprocesses=2
     - swagger-coverage-tool save-report
@@ -29,7 +28,7 @@ generate-allure-report:
   stage: report
   image: ubuntu:22.04
   script:
-    - apt-get update && apt-get install -y curl unzip openjdk-17-jre xargs
+    - apt-get update && apt-get install -y curl unzip openjdk-17-jre findutils
     - curl -o allure.tgz -L "https://github.com/allure-framework/allure2/releases/download/${ALLURE_VERSION}/allure-${ALLURE_VERSION}.tgz"
     - tar -xzf allure.tgz && mv allure-${ALLURE_VERSION} $ALLURE_HOME
     - export PATH="$ALLURE_HOME/bin:$PATH"
