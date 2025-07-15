@@ -20,14 +20,15 @@ test:
   stage: test
   image: python:$PYTHON_VERSION
   script:
+    - python path/to/create_allure_environment_file.py  # ← путь к твоему скрипту
     - pytest -m regression --alluredir=allure-results --numprocesses=2
     - swagger-coverage-tool save-report
   artifacts:
     when: always
     paths:
       - allure-results/
-      - coverage-history.json
       - coverage.html
+      - coverage-history.json
     expire_in: 1 week
 
 generate-allure-report:
@@ -51,7 +52,7 @@ generate-allure-report:
 pages:
   stage: pages
   script:
-    - echo "Публикация Allure-отчёта и coverage.html на GitLab Pages"
+    - echo "✅ Публикация Allure и coverage.html на GitLab Pages"
   artifacts:
     paths:
       - public
