@@ -1,22 +1,76 @@
+stages:
+  - build
+  - test
+  - report
+  - deploy
+
+variables:
+  ALLURE_VERSION: "2.27.0"
+  ALLURE_HOME: "/opt/allure"
+  PYTHONPATH: "${CI_PROJECT_DIR}"
+
+# 🔧 Установка зависимостей
+build:
+  stage: build
+  image: python:3.11
+  script:
+    - python -m venv .venv
+    - source .venv/bin/activate
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
+  artifacts:
+    paths:
+      - .venv
+    expire_in: 1 week
+
+# ✅ Запуск тестов
+pytest:
+  stage: test
+  image: python:3.11
+  dependencies:
+    - build
+  script:
+    - source .venv/bin/activate
+    - pytest --alluredir=allure-results
+  artifacts:
+    paths:
+      - allure-results
+      - coverage-history.json
+    expire_in: 1 week
+
+# 📊 Генерация отчета Allure + Coverage
 generate-report:
   stage: report
   image: ubuntu:22.04
-  variables:
-    ALLURE_VERSION: "2.27.0"
-    ALLURE_HOME: "/opt/allure"
+  dependencies:
+    - pytest
   before_script:
-    - apt-get update && apt-get install -y openjdk-17-jdk curl unzip xz-utils
+    - apt-get update && apt-get install -y curl openjdk-17-jdk unzip xz-utils
     - curl -L -o allure.tgz "https://github.com/allure-framework/allure2/releases/download/${ALLURE_VERSION}/allure-${ALLURE_VERSION}.tgz"
     - tar -xzf allure.tgz
-    - mv allure-${ALLURE_VERSION} $ALLURE_HOME
-    - export PATH="$ALLURE_HOME/bin:$PATH"
+    - mv allure-${ALLURE_VERSION} ${ALLURE_HOME}
+    - export PATH="${ALLURE_HOME}/bin:$PATH"
   script:
     - mkdir -p public
     - allure generate allure-results --clean -o public
-    - echo "[Coverage Report](./coverage.html)" > public/coverage-link.md
+    - cp coverage.html public/ || echo "coverage.html not found"
+    - echo "<meta http-equiv=\"refresh\" content=\"0; url=./index.html\" />" > public/index.html
   artifacts:
     paths:
       - public
     expire_in: 1 week
+  only:
+    - main
+
+# 🚀 Деплой на GitLab Pages
+pages:
+  stage: deploy
+  dependencies:
+    - generate-report
+  script:
+    - echo "Deploying GitLab Pages..."
+  artifacts:
+    paths:
+      - public
   only:
     - main
