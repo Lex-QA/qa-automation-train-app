@@ -1,17 +1,11 @@
 stages:
   - test
   - report
-  - pages
+  - deploy
 
 variables:
-  APP_HOST: "http://85.192.34.140:8080"
   ALLURE_VERSION: "2.27.0"
   ALLURE_HOME: "$CI_PROJECT_DIR/allure"
-
-cache:
-  paths:
-    - .cache/pip
-    - coverage-history.json
 
 test:
   stage: test
@@ -20,7 +14,7 @@ test:
     - apt-get update && apt-get install -y openjdk-17-jre curl unzip
     - python -m pip install --upgrade pip
     - pip install -r requirements.txt
-    - pytest -m regression --alluredir=allure-results --numprocesses=2
+    - pytest --alluredir=allure-results
     - python -m swagger_coverage_tool save-report
   artifacts:
     when: always
@@ -33,9 +27,8 @@ generate-allure-report:
   stage: report
   image: openjdk:17
   script:
-    - apt-get update && apt-get install -y curl tar
     - curl -o allure.tgz -L "https://github.com/allure-framework/allure2/releases/download/${ALLURE_VERSION}/allure-${ALLURE_VERSION}.tgz"
-    - tar -xzf allure.tgz && mv allure-${ALLURE_VERSION} $ALLURE_HOME
+    - tar -xzf allure.tgz && mv "allure-${ALLURE_VERSION}" "$ALLURE_HOME"
     - export PATH="$ALLURE_HOME/bin:$PATH"
     - mkdir -p public
     - allure generate allure-results --clean -o public
@@ -43,14 +36,11 @@ generate-allure-report:
   artifacts:
     paths:
       - public
-  needs:
-    - job: test
-      artifacts: true
 
 pages:
-  stage: pages
+  stage: deploy
   script:
-    - echo "Publishing Allure and coverage"
+    - echo "Publishing Allure and Coverage"
   artifacts:
     paths:
       - public
