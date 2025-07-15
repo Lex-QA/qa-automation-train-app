@@ -6,11 +6,11 @@ stages:
 image: python:3.11
 
 variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   ALLURE_VERSION: "2.27.0"
   ALLURE_HOME: "$CI_PROJECT_DIR/allure"
   ALLURE_RESULTS_DIR: "allure-results"
   ALLURE_REPORT_DIR: "public"
+  HISTORY_DIR: ".allure-history"
 
 cache:
   paths:
@@ -38,7 +38,6 @@ generate-report:
   image: ubuntu:22.04
   dependencies:
     - test
-    - generate-report
   before_script:
     - apt-get update && apt-get install -y openjdk-17-jdk curl unzip xz-utils
     - curl -L -o allure.tgz "https://github.com/allure-framework/allure2/releases/download/${ALLURE_VERSION}/allure-${ALLURE_VERSION}.tgz"
@@ -46,15 +45,17 @@ generate-report:
     - mv "allure-${ALLURE_VERSION}" "$ALLURE_HOME"
     - export PATH="$ALLURE_HOME/bin:$PATH"
   script:
-    - mkdir -p $ALLURE_RESULTS_DIR
-    - if [ -d public/history ]; then cp -r public/history $ALLURE_RESULTS_DIR/; fi
+    # Восстанавливаем history из предыдущего пайплайна
+    - if [ -d $HISTORY_DIR ]; then cp -r $HISTORY_DIR $ALLURE_RESULTS_DIR/history; fi
     - mkdir -p $ALLURE_REPORT_DIR
     - allure generate $ALLURE_RESULTS_DIR --clean -o $ALLURE_REPORT_DIR
+    # Сохраняем history для следующего пайплайна
+    - cp -r $ALLURE_REPORT_DIR/history $HISTORY_DIR || echo "No history to save"
     - cp coverage.html $ALLURE_REPORT_DIR/
   artifacts:
     paths:
       - $ALLURE_REPORT_DIR
-      - $ALLURE_REPORT_DIR/history/
+      - $HISTORY_DIR
     expire_in: 1 week
 
 pages:
