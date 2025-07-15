@@ -15,7 +15,7 @@ test:
     - pip install -r requirements.txt
     - pytest -m regression --alluredir=allure-results --numprocesses=2
     - swagger-coverage-tool save-report
-    - python tools/allure/environment.py
+    - PYTHONPATH=$PYTHONPATH:. python tools/allure/environment.py
   artifacts:
     paths:
       - allure-results/
@@ -43,7 +43,7 @@ generate-allure-report:
 pages:
   stage: pages
   script:
-    - echo "Pages deployed"
+    - echo "Deployed to GitLab Pages"
   artifacts:
     paths:
       - public
