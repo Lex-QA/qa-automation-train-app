@@ -1,7 +1,4 @@
-from pydantic import BaseModel, HttpUrl, Field, FilePath
-
-from tools.fakers import fake
-
+from pydantic import BaseModel
 
 
 class StatusCodesSchema(BaseModel):

@@ -1,11 +1,12 @@
-from clients.authentication.authentication_schema import LoginResponseSchema
-from clients.status_codes.status_codes_schema import StatusCodesSchema
-from tools.assertions.base import assert_equal, assert_is_true
 import allure
+
+from clients.status_codes.status_codes_schema import StatusCodesSchema
+from tools.assertions.base import assert_equal
 from tools.logger import get_logger
 from tools.status_codes import StatusCodes
 
 logger = get_logger("STATUS_CODES_ASSERTIONS")
+
 
 @allure.step("Check status code request body")
 def assert_status_code_response(response: StatusCodesSchema):
