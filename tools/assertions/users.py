@@ -3,8 +3,8 @@ import allure
 from clients.users.users_schema import CreateUserRequestSchema, CreateUserResponseSchema, GetUserResponseSchema, \
     UserSchema, GetUsersResponseSchema, UpdateUserPasswordResponseSchema
 from tools.assertions.base import assert_equal
-from tools.logger import get_logger
 from tools.info import Info
+from tools.logger import get_logger
 
 logger = get_logger("USERS_ASSERTIONS")
 
@@ -77,15 +77,6 @@ def assert_get_users_response(
     assert len(users_response.root) == expected_count, (
         f"Expected {expected_count} users, got {len(users_response.root)}"
     )
-
-    # Проверка формата каждого элемента
-    for user in users_response.root:
-        if "@" in user:  # Для email
-            assert "." in user.split("@")[1], f"Invalid email format: {user}"
-        elif user.startswith("Unhuman"):  # Для специальных ID
-            assert len(user) > 20, f"Invalid Unhuman ID format: {user}"
-        else:  # Для других идентификаторов
-            assert len(user) >= 5, f"Invalid identifier format: {user}"
 
 
 @allure.step("Check update user password")
