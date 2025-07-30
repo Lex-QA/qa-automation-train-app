@@ -56,13 +56,13 @@ Clone the repository and navigate to the project directory:
 For GitHub:
 ```shell
 git clone https://github.com/Lex-QA/qa-automation-train-app.git
-cd qa-automation-train-app
+cd qa-automation-train-app-api
 ```
 
 For GitLab:
 ```shell
 git clone https://gitlab.com/lex-qa/qa-automation-train-app.git
-cd qa-automation-train-app
+cd qa-automation-train-app-api
 ```
 
 Create and activate a virtual environment:
