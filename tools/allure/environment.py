@@ -13,7 +13,7 @@ def create_allure_environment_file():
     items.extend([
         f'os_info={os_info}',
         f'python_version={python_version}',
-        f'coverage_report_url=https://qa-automation-train-app-de0a64.gitlab.io/coverage.html'
+        f'coverage_report_url=https://qa-automation-train-app-api-de0a64.gitlab.io/coverage.html'
     ])
 
     properties = '\n'.join(items)
